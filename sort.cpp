@@ -54,7 +54,7 @@ int main(){
 	opencvShow(A, change, -1);   //-1 means no change index and compare index
 	quickSort(A, 0, NUM-1);
 	
-	outputVideo();
+	//outputVideo();
 	
 	return 0;
 }
@@ -223,7 +223,7 @@ void opencvShow(vector<int> A, map<int, int> change, int current){
 	ss << "comparison:" << compN;
 	ss >> compString;
 	putText(back, compString, Point(10, 30), FONT_HERSHEY_COMPLEX, 1, Scalar(255, 255, 255), 2, CV_AA);
-	//imshow("result", back);
+	imshow("result", back);
 	image.push_back(back);
 	if(waitKey(DELAY) >= 0) return;
 }
