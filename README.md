@@ -1,13 +1,13 @@
-### README ###
+# README #
 using opencv to visualize the sort algorithm.
 
-## Sort algorithm ##
+### Sort algorithm ###
 (2014 08.22)  
 insertion sort  
 merge sort  
 quick sort  
 
-## USAGE ##
+### USAGE ###
 ```
 opencv sort.cpp  
 ```
