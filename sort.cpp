@@ -24,13 +24,14 @@ void opencvShow(vector<int>, map<int, int>, int);
 void outputVideo();
 
 const int NUM=100;
-const int DELAY=50;
+const int DELAY=10;
 int compN=0;
 int HEIGHT=768, WIDTH=1024;
 map<int, int> change;
-vector<Mat> image;
+//VideoWriter writer("Sort.avi", CV_FOURCC('M', 'J', 'P', 'G'), 20, Size(WIDTH, HEIGHT));
 
-int main(){
+int main(){	
+
 	srand(time(NULL));
 	vector<int> A;
 	
@@ -53,9 +54,7 @@ int main(){
 	A = generateRandom(NUM);   //generate 100 random number between 1~100
 	opencvShow(A, change, -1);   //-1 means no change index and compare index
 	quickSort(A, 0, NUM-1);
-	
-	//outputVideo();
-	
+		
 	return 0;
 }
 
@@ -223,34 +222,12 @@ void opencvShow(vector<int> A, map<int, int> change, int current){
 	ss << "comparison:" << compN;
 	ss >> compString;
 	putText(back, compString, Point(10, 30), FONT_HERSHEY_COMPLEX, 1, Scalar(255, 255, 255), 2, CV_AA);
+	
+	//output the video
+	//writer << back;	
+
 	imshow("result", back);
-	image.push_back(back);
 	if(waitKey(DELAY) >= 0) return;
 }
 
-//ask if want to write into the video
-void outputVideo(){
-	string outputFilename;
-	cout << endl << "Output the video file?(Y/N): ";
-	string check;
-	while(getline(cin, check)){
-		if(check.compare("y")==0 || check.compare("Y")==0){
-			cout << "output file name: ";
-			getline(cin, outputFilename);
-			VideoWriter writer(outputFilename.c_str(), CV_FOURCC('M', 'J', 'P', 'G'), 2, Size(HEIGHT, WIDTH));
-			if(writer.isOpened()){
-				for(int i=0 ; i<image.size() ; i++){
-					writer << image[i];
-				}
-			}
-			break;
-		}
-		else if(check.compare("n")==0 || check.compare("N")==0){
-			break;
-		}
-		else{
-			cout << "Wrong input." << endl;
-		}
-	}
-	cout << endl << "Bye Bye!" << endl;
-}
+
