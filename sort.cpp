@@ -4,37 +4,57 @@
 #include <string>
 #include <cmath>
 #include <map>
+#include <algorithm>
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 using namespace std;
 using namespace cv;
+
 void insertionSort(vector<int>&);
+
 void merge(vector<int>&, int, int, int);
 void mergeSort(vector<int>&, int, int);
+
+void quickSort(vector<int>&, int, int);
+int partition(vector<int>&, int, int);
+
 vector<int> generateRandom(int);
 void printVector(vector<int>);
 void opencvShow(vector<int>, map<int, int>, int);
+void outputVideo();
+
 const int NUM=100;
-const int DELAY=5;
-int compN=1;
+const int DELAY=50;
+int compN=0;
+int HEIGHT=768, WIDTH=1024;
 map<int, int> change;
+vector<Mat> image;
 
 int main(){
 	srand(time(NULL));
 	vector<int> A;
 	
-	/*/insertion sort
+	//insertion sort
 	compN=0;
 	A = generateRandom(NUM);   //generate 100 random number between 1~100
 	opencvShow(A, change, -1);   //-1 means no change index and compare index
-	insertionSort(A);*/
+	insertionSort(A);
 	
 	//merge sort
+	change.clear();
 	compN=0;
 	A = generateRandom(NUM);   //generate 100 random number between 1~100
 	opencvShow(A, change, -1);   //-1 means no change index and compare index
-	mergeSort(A,0,99);
-	waitKey();
+	mergeSort(A,0,NUM-1);
+	
+	//quick sort
+	change.clear();
+	compN=0;
+	A = generateRandom(NUM);   //generate 100 random number between 1~100
+	opencvShow(A, change, -1);   //-1 means no change index and compare index
+	quickSort(A, 0, NUM-1);
+	
+	outputVideo();
 	
 	return 0;
 }
@@ -86,7 +106,9 @@ void mergeSort(vector<int> &A, int p, int r){
 		merge(A, p, q, r);
 	}
 }
-
+/*
+ * merge function
+*/
 void merge(vector<int> &A, int p, int q, int r){
 	int n1 = q-p+1;
 	int n2 = r-q;
@@ -101,8 +123,8 @@ void merge(vector<int> &A, int p, int q, int r){
 	int i=0, j=0;
 	for(int k=p; k<=r; k++){
 		change.clear();
-		change[L[i]]=1;
-		change[R[j]]=1;
+		change[p+i]=1;
+		change[q+j+1]=2;
 		opencvShow(A, change, k);
 		++compN;   //add the comparison
 		if(L[i] <= R[j]){
@@ -114,10 +136,51 @@ void merge(vector<int> &A, int p, int q, int r){
 			++j;
 		}
 		change.clear();
-		change[L[i]]=1;
-		change[L[j]]=1;
+		change[p+i]=1;
+		change[q+j+1]=2;
 		opencvShow(A, change, k);
 	}
+}
+
+/*
+ * quick sort
+*/
+void quickSort(vector<int> &A, int p, int r){
+	if(p < r){
+		int q = partition(A, p, r);
+		quickSort(A, p, q-1);
+		quickSort(A, q+1, r);
+	}
+}
+
+/*
+ * partition function, return the partition index
+*/
+int partition(vector<int> &A, int p , int r){
+	int x = A[r];
+	int i = p-1;
+	change.clear();
+	opencvShow(A, change, r);
+	for(int j=p; j<=r-1; j++){
+		change.clear();
+		change[j]=1;
+		change[i]=2;
+		opencvShow(A, change, r);
+		++compN;
+		if(A[j] <= x){
+			++i;
+			swap(A[i], A[j]);
+		}
+		change.clear();
+		change[j]=1;
+		change[i]=2;
+		opencvShow(A, change, r);
+	}
+	swap(A[i+1], A[r]);
+	change.clear();
+	opencvShow(A, change, r);
+
+	return i+1;
 }
 
 /*
@@ -135,7 +198,6 @@ void printVector(vector<int> A){
  * the third parameter is the current index, the green color
 */
 void opencvShow(vector<int> A, map<int, int> change, int current){
-	int HEIGHT=768, WIDTH=1024;
 	Point s, t;   //the observation we want to see
 	//set up the back frame
 	Mat back = Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
@@ -152,6 +214,8 @@ void opencvShow(vector<int> A, map<int, int> change, int current){
 			rectangle(back, s, t, Scalar(0, 255, 0), 2, CV_AA, 0);
 		else if(change[i]==1)
 			rectangle(back, s, t, Scalar(0, 0, 255), 2, CV_AA, 0);
+		else if(change[i]==2)
+			rectangle(back, s, t, Scalar(0, 255, 255), 2, CV_AA, 0);
 		else
 			rectangle(back, s, t, Scalar(255, 255, 255), 2, CV_AA, 0);
 	}
@@ -159,6 +223,34 @@ void opencvShow(vector<int> A, map<int, int> change, int current){
 	ss << "comparison:" << compN;
 	ss >> compString;
 	putText(back, compString, Point(10, 30), FONT_HERSHEY_COMPLEX, 1, Scalar(255, 255, 255), 2, CV_AA);
-	imshow("result", back);
+	//imshow("result", back);
+	image.push_back(back);
 	if(waitKey(DELAY) >= 0) return;
+}
+
+//ask if want to write into the video
+void outputVideo(){
+	string outputFilename;
+	cout << endl << "Output the video file?(Y/N): ";
+	string check;
+	while(getline(cin, check)){
+		if(check.compare("y")==0 || check.compare("Y")==0){
+			cout << "output file name: ";
+			getline(cin, outputFilename);
+			VideoWriter writer(outputFilename.c_str(), CV_FOURCC('M', 'J', 'P', 'G'), 2, Size(HEIGHT, WIDTH));
+			if(writer.isOpened()){
+				for(int i=0 ; i<image.size() ; i++){
+					writer << image[i];
+				}
+			}
+			break;
+		}
+		else if(check.compare("n")==0 || check.compare("N")==0){
+			break;
+		}
+		else{
+			cout << "Wrong input." << endl;
+		}
+	}
+	cout << endl << "Bye Bye!" << endl;
 }
