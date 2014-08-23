@@ -202,13 +202,13 @@ void opencvShow(vector<int> A, map<int, int> change, int current){
 	Mat back = Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
 	string compString;
 
-	s.x=10;
-	t.x=10;
-	t.y=700;
+	s.x=(WIDTH-20)/NUM;
+	t.x=(WIDTH-20)/NUM;
+	t.y=HEIGHT-60;
 	for(int i=0; i<NUM; i++){
-		s.x+=10;
-		t.x+=10;
-		s.y=700-A[i]*6;
+		s.x+=(WIDTH-20)/NUM;
+		t.x+=(WIDTH-20)/NUM;
+		s.y=(HEIGHT-60)-A[i]*((HEIGHT-60)/NUM-1);
 		if(i==current)
 			rectangle(back, s, t, Scalar(0, 255, 0), 2, CV_AA, 0);
 		else if(change[i]==1)
