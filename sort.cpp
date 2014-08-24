@@ -23,7 +23,7 @@ void printVector(vector<int>);
 void opencvShow(vector<int>, map<int, int>, int);
 void outputVideo();
 
-const int NUM=100;
+const int NUM=50;
 const int DELAY=10;
 int compN=0;
 int HEIGHT=768, WIDTH=1024;
@@ -202,12 +202,12 @@ void opencvShow(vector<int> A, map<int, int> change, int current){
 	Mat back = Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
 	string compString;
 
-	s.x=(WIDTH-20)/NUM;
-	t.x=(WIDTH-20)/NUM;
+	s.x=0;
+	t.x=0;
 	t.y=HEIGHT-60;
 	for(int i=0; i<NUM; i++){
-		s.x+=(WIDTH-20)/NUM;
-		t.x+=(WIDTH-20)/NUM;
+		s.x+=(WIDTH-10)/NUM;
+		t.x+=(WIDTH-10)/NUM;
 		s.y=(HEIGHT-60)-A[i]*((HEIGHT-60)/NUM-1);
 		if(i==current)
 			rectangle(back, s, t, Scalar(0, 255, 0), 2, CV_AA, 0);
